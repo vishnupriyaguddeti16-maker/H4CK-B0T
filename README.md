@@ -1,55 +1,45 @@
-# H4CK-B0T
+# H4CK-B0T — AI-Assisted Security Validation Platform
 
-H4CK-B0T is a beginner-friendly defensive security validation project. It demonstrates a simple assessment workflow for authorized targets only, using a safe, non-destructive approach focused on observation and validation.
+**H4CK-B0T** is an educational cybersecurity project designed to demonstrate a modular workflow for authorized security assessment, validation, evidence collection, risk calculation, and reporting.
 
-## Phase 1 Scope
+The project focuses on defensive security practices, scope enforcement, and non-destructive assessment techniques.
 
-This Phase 1 release focuses on the project foundation:
+## 🎯 Project Objectives
 
-- safe project structure
-- authorization and denylist checks
-- centralized logging
-- modular pipeline organization
-- JSON result files
-- basic tests
+- Organize security assessment into modular stages.
+- Enforce explicit authorization for assessment targets.
+- Record observations and support evidence collection.
+- Calculate risk and correlate findings.
+- Generate reports for security assessment workflows.
+- Provide a local dashboard and command-line entry points.
 
-This does not include advanced exploitation, enumeration, or other later-phase features.
+## ✨ Features
 
-**Trainer status:** Trainer Phase 1 Discovery remains **NOT complete**. The passive hints described below are small increments to the existing same-host inventory; they do not mean Phase 1 or all six trainer phases are complete.
+- **Target authorization:** Uses an explicit allowlist and denylist.
+- **Scope validation:** Applies same-host, scheme, and port restrictions to candidate URLs.
+- **Safety controls:** Includes URL validation, destination-address checks, rate limiting, and audit logging.
+- **Modular architecture:** Separates discovery, scanning, validation, evidence, risk, correlation, and reporting.
+- **Passive observations:** Records selected endpoint metadata as hints rather than treating it as confirmed technology identification.
+- **Local dashboard:** Provides a browser-based interface for local use.
+- **Automated tests:** Includes tests for project behavior and safety checks.
 
-## Architecture
+## 🛠️ Technology Stack
 
-The Phase 1 flow is:
+- Python
+- PyYAML
+- HTML and browser-based dashboard components
+- Pytest for automated testing
 
-1. Discovery
-2. Scan
-3. Validation
-4. Evidence collection
-5. Risk calculation
-6. Correlation
-7. Reporting
-
-### Discovery classifications
-
-Discovery inventories the authorized root and configured same-host candidate paths. For an already-observed reachable endpoint, it adds `Possible API endpoint` only when the existing `Content-Type` indicates JSON and the URL path contains an `api` path segment, case-insensitively. For example, `/api/users` with JSON receives the hint; `/users` with JSON remains ordinary JSON content, and `/api/users` with non-JSON content does not receive it.
-
-For an already-observed reachable endpoint with a non-empty `Server` header, discovery also adds `Unverified Server header observation: <trimmed observed value>`. This is an observation only: the value is not parsed into a product, version, framework, or confirmed technology.
-
-These are passive hints, not API or technology discovery or confirmation. They use only already-collected endpoint metadata: they make no additional network requests and read no response bodies. The API classification, existing endpoint metadata, candidate filtering, authorization and safety controls remain unchanged. Risk and report semantics are unchanged.
-
-Latest reported tests (from the prior Codex run; not rerun for this documentation update): focused tests **40 passed, 85 deselected**; full suite **125 passed, 0 failed**.
-
-## Project structure
+## 📁 Project Structure
 
 ```text
-H4CK-B0-T/
+H4CK-B0T/
+├── app.py
 ├── run.py
-├── requirements.txt
-├── README.md
+├── main.py
 ├── config/
 │   └── config.yaml
 ├── modules/
-│   ├── __init__.py
 │   ├── discovery.py
 │   ├── scanner.py
 │   ├── validation.py
@@ -58,80 +48,123 @@ H4CK-B0-T/
 │   ├── correlation.py
 │   └── report.py
 ├── utils/
-│   ├── __init__.py
 │   ├── logger.py
 │   └── safety.py
-├── results/
-├── logs/
-└── tests/
+├── tests/
+│   └── test_phase1.py
+├── requirements.txt
+├── README.md
+└── PROJECT_CHECKPOINT.md
 ```
 
-## Installation
+## ⚙️ Installation
+
+**Requirements:** Python 3 and pip.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/vishnupriyaguddetti16-maker/H4CK-B0T.git
+cd H4CK-B0T
+```
+
+Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Install the project dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-## Configuration
+The current `requirements.txt` lists PyYAML. Install pytest separately if it is not already available and you want to run the test suite.
 
-Edit [config/config.yaml](config/config.yaml) to set the authorized targets. Every assessment root must be explicitly listed here, regardless of the `safe_mode` setting. `safe_mode` does not grant permission to assess targets that are not allowlisted.
-Do not include usernames or passwords in target URLs; credentialed URLs are rejected even if allowlisted. The CLI, legacy entry points, dashboard, and direct module calls enforce authorization before making assessment requests.
+## 🔧 Configuration
 
-Example:
+Review `config/config.yaml` before running the project.
 
-```yaml
-authorized_targets:
-  - https://example.com
+- Keep `safe_mode: true`.
+- Add only targets you own or have explicit permission to assess.
+- Ensure assessment roots are explicitly allowlisted.
+- Never include usernames, passwords, API keys, or access tokens in target URLs.
+- Review rate limits and denylist settings before use.
 
-denylist: []
-safe_mode: true
-request_rate_limit: 1
-```
+Disabling safe mode does not grant authorization to assess a target.
 
-## Running the project
+## ▶️ Running the Project
 
-### Web dashboard
+### Local Dashboard
 
-Start the local dashboard with:
+Run:
 
 ```bash
 python app.py
 ```
 
-Then open `http://127.0.0.1:8765` in your browser. The dashboard displays the configured authorized targets, starts the existing seven-stage pipeline, and presents findings and risk summaries from the saved report. It listens only on the local machine. Assessment requests require both an explicit allowlist match in `config/config.yaml` and an authorization confirmation in the dashboard.
+Open the dashboard on the same computer:
 
-The dashboard does not add targets to the allowlist. Review and edit `authorized_targets` in `config/config.yaml` yourself, and keep `safe_mode: true`. Results remain in `results/`; audit and application logs remain in `logs/`.
+```text
+http://127.0.0.1:8765
+```
 
-### Command line
+This is a **local address**, not a public demo link. Do not expose a scan-capable instance to the public internet.
 
-The original command-line workflow is also available:
+### Command-Line Entry Point
+
+Run:
 
 ```bash
 python run.py
 ```
 
-When prompted, enter only an explicitly authorized target. The root target must appear in `authorized_targets` even when `safe_mode` is disabled. The legacy `main.py` discovery script uses the same authorization, denylist, timeout, rate-limit, and scoped redirect protections.
+Follow the prompts and assess only explicitly authorized targets.
 
-## Results and logs
+## 🧪 Running Tests
 
-- JSON results are stored in the `results/` directory.
-- Logs are stored in the `logs/` directory.
-- Audit logs are also written to the configured audit log path.
+From the project root:
 
-## Safety and authorization requirements
+```bash
+python -m pytest -q
+```
 
-This project is for authorized defensive security validation only. It must never scan a target that is not explicitly authorized. The safety checks in `utils/safety.py` enforce:
+Test results depend on the current code and environment. Run the tests locally to verify the current state before reporting a test count.
 
-- URL validation
-- allowlist enforcement
-- denylist enforcement
-- same-host, same-scheme, and same-port scope enforcement
-- resolved IP validation and address-pinned HTTP(S) connections
-- rejection of non-global and special-purpose destinations, except explicitly allowlisted loopback targets
-- direct assessment connections that bypass environment-configured proxies
-- basic rate limiting
-- centralized audit logging
+## 🛡️ Responsible Use
 
-## Important note
+H4CK-B0T is intended for educational and authorized defensive security validation only.
 
-This is a safe MVP for demonstration and educational use only. It intentionally avoids destructive or intrusive testing.
+The project includes safety checks intended to support:
+
+- Explicit target authorization
+- Denylist enforcement
+- URL and scope validation
+- Destination-address validation
+- Request rate limiting
+- Audit logging
+
+These controls reduce risk but do not guarantee that every assessment is safe. Review the code and configuration before use. Never assess systems without permission.
+
+## 🗺️ Development Status
+
+H4CK-B0T is an **early-stage MVP under development**. The broader roadmap includes discovery, attack-surface analysis, vulnerability assessment, security validation, attack-path correlation, and reporting.
+
+Not all planned phases are complete. Refer to `PROJECT_CHECKPOINT.md` for the project's progress notes.
+
+## 👩‍💻 Author
+
+**Vishnu Priya**
+
+GitHub: [vishnupriyaguddetti16-maker](https://github.com/vishnupriyaguddetti16-maker)
+
+## ⚠️ Disclaimer
+
+This project is for learning and authorized defensive security validation. Users are responsible for obtaining permission before assessing any target and for following applicable laws and policies.
